@@ -20,7 +20,7 @@ psql postgres
 
 ## 1 Creation de la base de données POSTGRESQL et du rôle d'administrateur
 
-Maintenant que le client postgresql est installé, vous aurez besoin de créer un rôle d'utilisateur (admin) différent "root". Car utiliser l'utilisateur root c'est toujours une source potentielle de problèmes pour la sécurité de vos données 😊.
+Maintenant que le client postgresql est installé, vous aurez besoin de créer un rôle d'utilisateur (admin) différent de "root". Car utiliser l'utilisateur root c'est toujours une source potentielle de problèmes pour la sécurité de vos données 😊.
 
 ```sql
 CREATE ROLE admin WITH LOGIN PASSWORD 'password';
@@ -28,7 +28,7 @@ CREATE ROLE admin WITH LOGIN PASSWORD 'password';
 ALTER ROLE admin CREATEDB;
 ```
 
-Ici on a donc créé le rôle admin avec le mot de passe `password`, on lui a attribué le rôle `CREATEDB` pour lui permettre de créer la base de données.
+Ici, on a donc créé le rôle admin avec le mot de passe `password`, on lui a attribué le rôle `CREATEDB` pour lui permettre de créer la base de données.
 
 ```shell
 # On se déconnecte de l'utilisateur root
@@ -59,7 +59,7 @@ CREATE DATABASE api;
 
 ## 2 Creation de la table user et ajout de deux entrées
 
-- Maintenant que la base de données est créee, on peut créer une table qui servira à contenir les users
+Maintenant que la base de données est créée, on peut créer une table qui servira à contenir les users
 
 ```sql
 CREATE TABLE users (
@@ -69,11 +69,11 @@ CREATE TABLE users (
 );
 ```
 
-- On ajoute deux nouvelles entrées dans la table
+On ajoute deux nouvelles entrées dans la table.
 
 ```sql
 INSERT INTO users (name, email)
-  VALUES ('cadillac', 'cadillac@lecrou.fr'), ('popip','popip@lecrou.fr');
+  VALUES ('king-ju', 'king-ju@stupeflip.fr'), ('popip','popip@stupeflip.fr');
 ```
 
 ## 3 Création d'un serveur node avec koa js
@@ -83,9 +83,9 @@ mkdir stupeflip-api
 cd stupeflip-api
 ```
 
-- On crée un fichier *package.json* à la racine de notre projet via `yarn init -y` (toutes les commandes yarn fonctionnent aussi avec un équivalent npm)
+On crée un fichier *package.json* à la racine de notre projet via `yarn init -y` (toutes les commandes yarn fonctionnent aussi avec un équivalent npm)
 
-Parfait, maintenant que le fichier package.json est créé, on peut ajouter les dépendances. Les dépendances sont des modules la plupart du temps open source (c'est à dire maintenus et versionnés par un ou plusieurs développeurs), stockés sur le dépot distant npm. Si on a besoin d'utiliser un de ses modules, on peut le télécharger dans notre projet grace à la commande `yarn add <nom-du-module>`
+Parfait, maintenant que le fichier package.json est créé, on peut ajouter les dépendances. Les dépendances sont des modules la plupart du temps open source (c'est à dire maintenus et versionés par un ou plusieurs développeurs), stockés sur le dépot distant npm. Si on a besoin d'utiliser un de ses modules, on peut le télécharger dans notre projet grace à la commande `yarn add <nom-du-module>`
 
 ```shell
   yarn add koa koa-body koa-router pg dotenv
@@ -96,7 +96,7 @@ Parfait, maintenant que le fichier package.json est créé, on peut ajouter les 
 - **pg** est le client node qui nous permettra de communiquer avec la base de données postgresql
 - **dotenv** est un module qui permet de lire le contenu des fichiers .env (plus d'infos après)
 
-Ensuite on crée un dossier `src/`. Le but de ce dossier est de contenir tout le code de notre projet. On crée ensuite un fichier `index.js` à la racine de src. Dans lequel on ajoute le code suivant :
+Ensuite, on crée un dossier `src/`. Le but de ce dossier est de contenir tout le code de notre projet. On crée ensuite un fichier `index.js` à la racine de src. Dans lequel on ajoute le code suivant :
 
 ```JavaScript
   // On importe les dépendances
@@ -170,7 +170,7 @@ Pour permettre aux utilisateurs de notre projet d'utiliser la base de données d
 
 - `/users` est ce qu'on appelle l'endpoint de la route. C'est une partie de l'url qui indique que l'on se situe sur la partie de notre serveur qui gère les utilisateurs (users)
 
-Après cette petite parenthese théorique, place à la pratique. Nous allons donc créer un nouveau fichier dans `src/controllers/users/index.js` :
+Après cette petite parenthèse théorique, place à la pratique. Nous allons donc créer un nouveau fichier dans `src/controllers/users/index.js` :
 
 ```JavaScript
 // On importe notre Pool de connexion
@@ -227,7 +227,88 @@ router.get('/users', controller.getUsers)
 // Pour /user, on spécifie une requette POST. Elle nous servira à créer un utilisateur 
 router.post('/user', controller.createUser)
 
-// On export le routeur pour pourvoir le greffer à notre serveur koa
+// On export le routeur
 module.exports = router
 ```
 
+Maintenant que le routeur est créé, on va l'ajouter à notre serveur koa. Retournons dans notre fichier `src/index.js` pour y apporter quelques modifications:
+
+```JavaScript
+  const Koa = require('koa')
+  // on importe notre router
+  const userRouter = require('./routes/users')
+  const { koaBody } = require('koa-body')
+
+  const app = new Koa()
+
+  app.use(koaBody())
+  // et on le greffe à koa via app.use comme on le ferait pour un middleware
+  app.use(userRouter.routes())
+
+  app.listen(3000)
+```
+
+Ca y est nos deux endpoints ont été exposés ! On peut maintenant les tester via postman, ou avec une commande `curl`. L'avantage de postman c'est qu'il fournit une interface et qu'il est plus complet, mais pour que ce soit plus pratique sur le support écrit je vais utiliser curl. Libre à vous d'utiliser ce qui vous convient le mieux 😄
+
+Edit : n'oubliez pas de modifier le package.json comme ceci pour ajouter la commande qui lancera le serveur
+
+```json
+{
+  "name": "oclock-test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node src/index.js" // ici
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "koa": "^2.14.2",
+    "koa-body": "^6.0.1",
+    "koa-router": "^12.0.0",
+    "pg": "^8.10.0"
+  }
+}
+```
+
+```shell
+yarn run start
+```
+
+```shell
+  # GET sur les utilisateurs (pas besoin de spécifier de verbe. Par défaut, curl utilise GET)
+  curl http://localhost:3000/users
+```
+retour de la réponse : 
+```json
+{
+    "count": 14,
+    "data": [
+        {
+            "id": 1,
+            "name": "king-ju",
+            "email": "king-ju@stupeflip.fr"
+        },
+        {
+            "id": 2,
+            "name": "George",
+            "email": "george@example.fr"
+        },
+    ]
+}
+```
+
+Et pour le post
+
+```shell
+  # Ici on spécifie un POST avec le flag -X, 
+  # le content-type avec -H pour spécifier que le body est au format json
+  # -d pour spécifier le contenu du json
+  curl -X POST http://localhost:3000/user -H "Content-Type: application/json" -d '{"name": "cadillac", "email": "cadillac@stupeflip.fr"}' 
+
+  # Created new user with email cadillac@stupeflip.fr                                                                       
+```
+
+Nous avons donc vu comment créer un serveur node avec koa qui utilise les promèses pour ajouter et lister des utilisateurs dans une base de données postgres. Mais comme vous pouvez l'imaginer, ce projet est loin d'être varitablement opérationnel ! On peut notamment ajouter un système de gestion d'erreur, améliorer le système de logs, ajouter une interface front end, ajouter des tests fonctionnels et unitaires et même le mettre en ligne, mais ce sera l'objet d'un prochain cours !
+
+Si vous avez des feedbacks, n'hésitez pas à m'envoyer un mail ou même d'ouvrir une pull request directement sur ce dépôt !
