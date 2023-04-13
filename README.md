@@ -291,8 +291,8 @@ retour de la réponse :
         },
         {
             "id": 2,
-            "name": "George",
-            "email": "george@example.fr"
+            "name": "popip",
+            "email": "popip@stupeflip.fr"
         },
     ]
 }
